@@ -17,10 +17,6 @@ nationRouter.route('/')
         res.status(201).json({ message: 'Nation created successfully', nation: newNation });
     })
     .put((req, res) => res.status(403).end('PUT operation not supported on /nations'))
-    .delete((req, res) => {
-        nations.length = 0;
-        res.json({ message: 'All nations deleted successfully' });
-    });
 
 nationRouter.route('/:nationId')
     .get((req, res) => {

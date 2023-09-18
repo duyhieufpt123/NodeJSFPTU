@@ -3,6 +3,8 @@ const http = require('http');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const nationRouter = require('./routes/nationRouter');
+const playerRouter = require('./routes/playerRouter');
+
 
 const hostname = 'localhost';
 const port = 5000;
@@ -22,6 +24,7 @@ app.use(bodyParser.json());
 app.use(express.static(__dirname + '/public'))
 
 app.use('/nations', nationRouter);
+app.use('/players', playerRouter);
 
 const server = http.createServer(app);
 
