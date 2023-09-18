@@ -1,27 +1,29 @@
-const express = require('express'),
-    http = require('http');
+const express = require('express');
+const http = require('http');
+const morgan = require('morgan');
+const bodyParser = require('body-parser');
+const nationRouter = require('./routes/nationRouter');
 
 const hostname = 'localhost';
 const port = 5000;
 
 const app = express();
 
+
 app.use((req, res, next) => {
     console.log(req.headers);
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'text/html');
-    res.end('<html><body><h1>This is an Express Server</h1></body></html>');
-
+    next();
 });
 
+app.use(morgan('dev'));
+app.use(morgan('combined'));
+app.use(bodyParser.json());
+
+app.use(express.static(__dirname + '/public'))
+
+app.use('/nations', nationRouter);
+
 const server = http.createServer(app);
-
-	const morgan = require('morgan');
-
-	app.use(morgan('dev'));
-	
-	app.use(express.static(__dirname + '/public'));
-
 
 server.listen(port, hostname, () => {
     console.log(`Server running at http://${hostname}:${port}/`);
