@@ -18,7 +18,7 @@ app.use((req, res, next) => {
 });
 
 app.use(morgan('dev'));
-app.use(morgan('combined'));
+// app.use(morgan('combined'));
 app.use(bodyParser.json());
 
 app.use(express.static(__dirname + '/public'))

@@ -1,44 +1,72 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 
-const playerRouter = express.Router();
-playerRouter.use(bodyParser.json());
+const nationRouter = express.Router();
+nationRouter.use(bodyParser.json());
 
+let nations = [
+  {
+    id: 1,
+    name: 'Hieu',
+    description: 'Phu',
+  },
+];
 
-const players = [];
+nationRouter.route('/')
+  .get((req, res) => res.json(nations))
+  .post((req, res) => {
+    const newNation = req.body;
 
-playerRouter.route('/')
-    .get((req, res) => res.json(players))
-    .post((req, res) => {
-        const newPlayer = req.body;
-        if (!newPlayer || !newPlayer.name || !newPlayer.nation)
-            return res.status(400).json({ message: 'Bad request. Please provide valid data.' });
-            newPlayer.id = players.length + 1;
-            players.push(newPlayer);
-        res.status(201).json({ message: 'Nation created successfully', player: newPlayer });
-    })
-    .put((req, res) => res.status(403).end('PUT operation not supported on /players'))
+    if (!newNation || !newNation.name || !newNation.description) {
+      return res.status(400).json({ message: 'Bad request. Please provide valid data.' });
+    }
 
-playerRouter.route('/:playerId')
-    .get((req, res) => {
-        const player = players.find(p => p.id === parseInt(req.params.playerId));
-        if (!player) return res.status(404).json({ message: 'Player not found' });
-        res.json(player);
-    })
-    .post((req, res) => res.status(403).end('POST operation not supported on /players/:playerId'))
-    .put((req, res) => {
-        const updatedPlayer = req.body;
-        const playerIndex = players.findIndex(p => p.id === parseInt(req.params.playerId));
-        if (playerIndex === -1 || !updatedPlayer)
-            return res.status(404).json({ message: 'Player not found or invalid data provided' });
-        Object.assign(players[playerIndex], updatedPlayer);
-        res.json({ message: 'Player updated successfully', player: updatedPlayer });
-    })
-    .delete((req, res) => {
-        const playerIndex = players.findIndex(p => p.id === parseInt(req.params.playerId));
-        if (playerIndex === -1) return res.status(404).json({ message: 'Player not found' });
-        players.splice(playerIndex, 1);
-        res.json({ message: 'player deleted successfully' });
+    const duplicateNation = nations.find(n => n.id === newNation.id);
+
+    if (duplicateNation) {
+      return res.status(409).json({ message: 'Duplicate ID found' });
+    }
+
+    newNation.id = nations.length + 1;
+    nations.push(newNation);
+    res.status(201).json({ message: 'Nation created successfully', nation: newNation });
+  });
+
+nationRouter.route('/:nationId')
+  .get((req, res) => {
+    const nation = nations.find(n => n.id === parseInt(req.params.nationId));
+    if (!nation) return res.status(404).json({ message: 'Nation not found' });
+    res.json(nation);
+  })
+  .put((req, res) => {
+    const updatedNation = req.body;
+    const nationIndex = nations.findIndex(n => n.id === parseInt(req.params.nationId));
+
+    if (nationIndex === -1 || !updatedNation) {
+      return res.status(404).json({ message: 'Nation not found or invalid data provided' });
+    }
+
+    Object.assign(nations[nationIndex], updatedNation);
+    res.json({ message: 'Nation updated successfully', nation: updatedNation });
+  })
+  .delete((req, res) => {
+    const nationId = parseInt(req.params.nationId);
+    const nationIndex = nations.findIndex(n => n.id === nationId);
+
+    if (nationIndex === -1) {
+      return res.status(404).json({ message: 'Nation not found' });
+    }
+
+    const deletedNation = nations[nationIndex];
+    nations.splice(nationIndex, 1);
+
+    // Reassign IDs after deletion
+    nations = nations.map((nation, index) => {
+      nation.id = index + 1;
+      return nation;
     });
 
-module.exports = playerRouter;
+    res.json({ message: 'Nation deleted successfully', deletedNation });
+  });
+
+module.exports = nationRouter;
